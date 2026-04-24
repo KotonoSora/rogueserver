@@ -19,6 +19,7 @@ services:
         condition: service_healthy
     networks:
       - internal
+      - pagefault-rogueserver-net
     ports:
       - "127.0.0.1:8001:8001"
 
@@ -54,5 +55,6 @@ volumes:
 
 networks:
   internal:
+    internal: true
   pagefault-rogueserver-net:
     external: true
