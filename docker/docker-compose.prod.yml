@@ -1,7 +1,7 @@
 name: pagefault-rogueserver-prod
 
 services:
-  server:
+  rogueserver:
     build:
       context: ..
       dockerfile: Dockerfile
@@ -45,13 +45,13 @@ services:
       MYSQL_USER: pokerogue
       MYSQL_PASSWORD: pokerogue
     volumes:
-      - database:/var/lib/mysql
+      - rogueserver-database:/var/lib/mysql
     networks:
       - internal
     # no public exposure
 
 volumes:
-  database:
+  rogueserver-database:
 
 networks:
   internal:
