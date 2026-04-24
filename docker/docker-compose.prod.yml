@@ -5,15 +5,10 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+    container_name: rogueserver
     restart: unless-stopped
-    environment:
-      debug: false
-      dbaddr: db
-      dbuser: pokerogue
-      dbpass: pokerogue
-      dbname: pokeroguedb
-      gameurl: http://localhost:8000
-      callbackurl: http://localhost:8001
+    env_file:
+      - ../.env
     depends_on:
       db:
         condition: service_healthy
