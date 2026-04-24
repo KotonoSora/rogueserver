@@ -1,0 +1,68 @@
+name: pagefault-rogueserver-prod
+
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      debug: false
+      dbaddr: db
+      dbuser: pokerogue
+      dbpass: pokerogue
+      dbname: pokeroguedb
+      gameurl: http://localhost:8000
+      callbackurl: http://localhost:8001
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+    ports:
+      - "127.0.0.1:8001:8001"
+
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized",
+        ]
+      start_period: 10s
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: pokeroguedb
+      MYSQL_USER: pokerogue
+      MYSQL_PASSWORD: pokerogue
+    volumes:
+      - database:/var/lib/mysql
+    networks:
+      - internal
+    # no public exposure
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      WATCHTOWER_CLEANUP: true
+      WATCHTOWER_SCHEDULE: "@midnight"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  database:
+
+networks:
+  internal:
