@@ -354,6 +354,16 @@ func handleUpdateAll(w http.ResponseWriter, r *http.Request) {
 			httpError(w, r, fmt.Errorf("session out of date: existing playtime is greater"), http.StatusBadRequest)
 			return
 		}
+
+		cmp, err := savedata.CompareGameVersion(oldSystem.GameVersion, data.System.GameVersion)
+		if err != nil {
+			httpError(w, r, fmt.Errorf("failed to compare versions: %s", err), http.StatusBadRequest)
+			return
+		}
+		if cmp > 0 {
+			httpError(w, r, fmt.Errorf("session out of date: existing version is greater"), http.StatusBadRequest)
+			return
+		}
 	}
 
 	existingSave, err := savedata.GetSession(db.Store, uuid, data.SessionSlotId)
@@ -463,6 +473,16 @@ func handleSystem(w http.ResponseWriter, r *http.Request) {
 
 			if playtime < oldPlaytime {
 				httpError(w, r, fmt.Errorf("session out of date: existing playtime is greater"), http.StatusBadRequest)
+				return
+			}
+
+			cmp, err := savedata.CompareGameVersion(oldSystem.GameVersion, system.GameVersion)
+			if err != nil {
+				httpError(w, r, fmt.Errorf("failed to compare versions: %s", err), http.StatusBadRequest)
+				return
+			}
+			if cmp > 0 {
+				httpError(w, r, fmt.Errorf("session out of date: existing version is greater"), http.StatusBadRequest)
 				return
 			}
 		}
